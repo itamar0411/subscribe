@@ -29,6 +29,8 @@
 
     // Reject gibberish — real names always contain at least one vowel
     if (!/[aeiouy]/i.test(local)) return false;
+    // Reject 5+ consecutive consonants (e.g. asdfghjkl, qwrtyp)
+    if (/[^aeiouy\d._-]{5,}/i.test(local)) return false;
 
     // Reject known disposable / temporary email domains
     const disposableDomains = new Set([
