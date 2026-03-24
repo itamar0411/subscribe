@@ -1,51 +1,67 @@
-<link rel="stylesheet" href="https://subscribe-8m41.onrender.com/widget.css">
+<div id="subscribe-widget" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:2rem 1rem;box-sizing:border-box;">
 
-<div id="subscribe-widget">
-  <div class="card">
-    <div id="form-section">
-      <div class="card-header">
-        <div class="icon">🎁</div>
-        <h1>Get Exclusive Deals</h1>
-        <p>Subscribe and be the first to know about our special promotions and offers.</p>
+  <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);box-sizing:border-box;">
+
+    <div id="sw-form-section">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎁</div>
+        <h1 style="font-size:1.6rem;color:#1a1a2e;margin:0 0 0.4rem;font-weight:700;line-height:1.2;">Get Exclusive Deals</h1>
+        <p style="color:#6b7280;font-size:0.95rem;line-height:1.5;margin:0;">Subscribe and be the first to know about our special promotions and offers.</p>
       </div>
 
-      <form id="subscribe-form" novalidate>
-        <div class="row">
-          <div class="field">
-            <label for="first-name">First Name</label>
-            <input type="text" id="first-name" name="firstName" placeholder="Jane" autocomplete="given-name" />
-            <span class="field-error" id="first-name-error"></span>
+      <form id="sw-subscribe-form" novalidate style="margin:0;">
+        <div style="display:flex;gap:0.75rem;">
+
+          <div style="display:flex;flex-direction:column;margin-bottom:1.1rem;flex:1;">
+            <label for="sw-first-name" style="font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:0.35rem;display:block;">First Name</label>
+            <input type="text" id="sw-first-name" placeholder="Jane" autocomplete="given-name"
+              style="padding:0.65rem 0.9rem;border:1.5px solid #d1d5db;border-radius:8px;font-size:0.95rem;color:#111827;outline:none;width:100%;box-sizing:border-box;background:#fff;font-family:inherit;" />
+            <span id="sw-first-name-error" style="font-size:0.78rem;color:#ef4444;margin-top:0.3rem;min-height:1rem;display:block;"></span>
           </div>
-          <div class="field">
-            <label for="last-name">Last Name</label>
-            <input type="text" id="last-name" name="lastName" placeholder="Doe" autocomplete="family-name" />
-            <span class="field-error" id="last-name-error"></span>
+
+          <div style="display:flex;flex-direction:column;margin-bottom:1.1rem;flex:1;">
+            <label for="sw-last-name" style="font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:0.35rem;display:block;">Last Name</label>
+            <input type="text" id="sw-last-name" placeholder="Doe" autocomplete="family-name"
+              style="padding:0.65rem 0.9rem;border:1.5px solid #d1d5db;border-radius:8px;font-size:0.95rem;color:#111827;outline:none;width:100%;box-sizing:border-box;background:#fff;font-family:inherit;" />
+            <span id="sw-last-name-error" style="font-size:0.78rem;color:#ef4444;margin-top:0.3rem;min-height:1rem;display:block;"></span>
           </div>
+
         </div>
 
-        <div class="field">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" placeholder="jane@example.com" autocomplete="email" />
-          <span class="field-error" id="email-error"></span>
+        <div style="display:flex;flex-direction:column;margin-bottom:1.1rem;">
+          <label for="sw-email" style="font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:0.35rem;display:block;">Email Address</label>
+          <input type="email" id="sw-email" placeholder="jane@example.com" autocomplete="email"
+            style="padding:0.65rem 0.9rem;border:1.5px solid #d1d5db;border-radius:8px;font-size:0.95rem;color:#111827;outline:none;width:100%;box-sizing:border-box;background:#fff;font-family:inherit;" />
+          <span id="sw-email-error" style="font-size:0.78rem;color:#ef4444;margin-top:0.3rem;min-height:1rem;display:block;"></span>
         </div>
 
-        <button type="submit" id="submit-btn">Subscribe Now</button>
+        <button type="submit" id="sw-submit-btn"
+          style="width:100%;padding:0.8rem;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;margin-top:0.5rem;font-family:inherit;">
+          Subscribe Now
+        </button>
       </form>
     </div>
 
-    <div class="success" id="success-section">
-      <div class="check">✅</div>
-      <h2>You're in!</h2>
-      <p>Thanks for subscribing. We'll send you our best promotions soon.</p>
+    <div id="sw-success-section" style="display:none;text-align:center;padding:1.5rem 0 0.5rem;">
+      <div style="font-size:3rem;margin-bottom:0.75rem;">✅</div>
+      <h2 style="color:#1a1a2e;margin:0 0 0.4rem;font-size:1.4rem;">You're in!</h2>
+      <p style="color:#6b7280;font-size:0.95rem;margin:0;">Thanks for subscribing. We'll send you our best promotions soon.</p>
     </div>
+
   </div>
 
   <script>
   (() => {
-    const form           = document.getElementById('subscribe-form');
-    const submitBtn      = document.getElementById('submit-btn');
-    const formSection    = document.getElementById('form-section');
-    const successSection = document.getElementById('success-section');
+    const form           = document.getElementById('sw-subscribe-form');
+    const submitBtn      = document.getElementById('sw-submit-btn');
+    const formSection    = document.getElementById('sw-form-section');
+    const successSection = document.getElementById('sw-success-section');
+
+    const inputs = {
+      'sw-first-name': document.getElementById('sw-first-name'),
+      'sw-last-name':  document.getElementById('sw-last-name'),
+      'sw-email':      document.getElementById('sw-email'),
+    };
 
     function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
 
@@ -65,37 +81,45 @@
     }
 
     function showError(inputId, errorId, msg) {
-      document.getElementById(inputId).classList.add('invalid');
+      inputs[inputId].style.borderColor = '#ef4444';
       document.getElementById(errorId).textContent = msg;
       return false;
     }
     function clearError(inputId, errorId) {
-      document.getElementById(inputId).classList.remove('invalid');
+      inputs[inputId].style.borderColor = '#d1d5db';
       document.getElementById(errorId).textContent = '';
     }
 
-    ['first-name', 'last-name', 'email'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => clearError(id, id + '-error'));
+    Object.keys(inputs).forEach(id => {
+      inputs[id].addEventListener('focus', () => { inputs[id].style.borderColor = '#667eea'; inputs[id].style.boxShadow = '0 0 0 3px rgba(102,126,234,0.15)'; });
+      inputs[id].addEventListener('blur',  () => { inputs[id].style.boxShadow = 'none'; });
+      inputs[id].addEventListener('input', () => clearError(id, id + '-error'));
     });
+
+    submitBtn.addEventListener('mouseover', () => { submitBtn.style.opacity = '0.92'; });
+    submitBtn.addEventListener('mouseout',  () => { submitBtn.style.opacity = '1'; });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const firstName = document.getElementById('first-name').value.trim();
-      const lastName  = document.getElementById('last-name').value.trim();
-      const email     = document.getElementById('email').value.trim();
+      const firstName = inputs['sw-first-name'].value.trim();
+      const lastName  = inputs['sw-last-name'].value.trim();
+      const email     = inputs['sw-email'].value.trim();
 
-      ['first-name', 'last-name', 'email'].forEach(id => clearError(id, id + '-error'));
+      Object.keys(inputs).forEach(id => clearError(id, id + '-error'));
       let valid = true;
-      if (!firstName) valid = showError('first-name', 'first-name-error', 'First name is required.');
-      if (!lastName)  valid = showError('last-name',  'last-name-error',  'Last name is required.');
-      if (!email)                    valid = showError('email', 'email-error', 'Email address is required.');
-      else if (!isValidEmail(email)) valid = showError('email', 'email-error', 'Please enter a valid email address.');
+      if (!firstName) valid = showError('sw-first-name', 'sw-first-name-error', 'First name is required.');
+      if (!lastName)  valid = showError('sw-last-name',  'sw-last-name-error',  'Last name is required.');
+      if (!email)                    valid = showError('sw-email', 'sw-email-error', 'Email address is required.');
+      else if (!isValidEmail(email)) valid = showError('sw-email', 'sw-email-error', 'Please enter a valid email address.');
       if (!valid) return;
 
       if (!isLegitEmail(email)) { simulateSuccess(); return; }
 
       submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.cursor = 'not-allowed';
       submitBtn.textContent = 'Subscribing…';
+
       try {
         const res = await fetch('https://subscribe-8m41.onrender.com/api/subscribe', {
           method: 'POST',
@@ -106,6 +130,8 @@
         showSuccess();
       } catch {
         submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
         submitBtn.textContent = 'Subscribe Now';
         alert('Something went wrong. Please try again later.');
       }
@@ -113,6 +139,7 @@
 
     function simulateSuccess() {
       submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
       submitBtn.textContent = 'Subscribing…';
       setTimeout(showSuccess, 900);
     }
@@ -122,4 +149,5 @@
     }
   })();
   </script>
+
 </div>
