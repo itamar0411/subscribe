@@ -34,19 +34,24 @@ function isLegitEmail(email) {
   return true;
 }
 
-async function sendNotification({ firstName, lastName, email, submitted }) {
-  const status = submitted ? '✅ Successfully added to OwnerRez' : '⚠️ Flagged as suspicious — not submitted';
+async function sendNotification({ firstName, lastName, email, status }) {
+  const statusMap = {
+    success:   { label: '✅ Successfully added to OwnerRez', subject: `New subscriber: ${firstName} ${lastName}` },
+    suspicious: { label: '⚠️ Flagged as suspicious — not submitted', subject: `Suspicious subscription attempt` },
+    error:     { label: '❌ OwnerRez error — not added to contacts', subject: `Subscription error: ${firstName} ${lastName}` },
+  };
+  const { label, subject } = statusMap[status];
   await mailer.sendMail({
     from: `"High Five Retreats" <${process.env.GMAIL_USER}>`,
     to: process.env.NOTIFY_EMAIL,
-    subject: submitted ? `New subscriber: ${firstName} ${lastName}` : `Suspicious subscription attempt`,
-    text: `New subscription form submission\n\nName:   ${firstName} ${lastName}\nEmail:  ${email}\nStatus: ${status}`,
+    subject,
+    text: `New subscription form submission\n\nName:   ${firstName} ${lastName}\nEmail:  ${email}\nStatus: ${label}`,
     html: `
       <p><strong>New subscription form submission</strong></p>
       <table cellpadding="6">
         <tr><td><strong>Name</strong></td><td>${firstName} ${lastName}</td></tr>
         <tr><td><strong>Email</strong></td><td>${email}</td></tr>
-        <tr><td><strong>Status</strong></td><td>${status}</td></tr>
+        <tr><td><strong>Status</strong></td><td>${label}</td></tr>
       </table>
     `,
   });
@@ -75,7 +80,7 @@ app.post('/api/subscribe', (req, res) => {
   const legit = isLegitEmail(email);
 
   if (!legit) {
-    sendNotification({ firstName, lastName, email, submitted: false }).catch(console.error);
+    sendNotification({ firstName, lastName, email, status: 'suspicious' }).catch(console.error);
     return;
   }
 
@@ -92,9 +97,8 @@ app.post('/api/subscribe', (req, res) => {
     }),
   })
     .then(r => {
-      const submitted = r.ok;
-      if (!submitted) console.error('OwnerRez error:', r.status);
-      return sendNotification({ firstName, lastName, email, submitted });
+      if (!r.ok) console.error('OwnerRez error:', r.status);
+      return sendNotification({ firstName, lastName, email, status: r.ok ? 'success' : 'error' });
     })
     .catch(err => console.error('Background processing error:', err));
 });
