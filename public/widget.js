@@ -19,6 +19,7 @@
     const [local, domain] = email.split('@');
     if (/^(test|fake|asdf|qwerty|noreply|donotreply|null|undefined|example|nope|xxx|aaa|bbb|123|abc)\d*$/.test(local)) return false;
     if (local.length < 2 || local.length > 64) return false;
+    if (!/[aeiouy]/i.test(local)) return false;
     const disposable = new Set(['mailinator.com','guerrillamail.com','guerrillamail.net','guerrillamail.org','sharklasers.com','grr.la','spam4.me','trashmail.com','trashmail.me','trashmail.net','trashmail.at','trashmail.io','yopmail.com','yopmail.fr','tempr.email','dispostable.com','throwam.com','maildrop.cc','getairmail.com','filzmail.com','spamgourmet.com','fakeinbox.com','mailnull.com','spamspot.com']);
     if (disposable.has(domain)) return false;
     if (['example.com','example.net','example.org','test.com','localhost'].includes(domain)) return false;
