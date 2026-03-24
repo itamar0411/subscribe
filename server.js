@@ -91,8 +91,11 @@ app.post('/api/subscribe', (req, res) => {
       email_addresses: [{ address: email, is_default: true }],
     }),
   })
-    .then(r => r.ok ? r.json() : Promise.reject(r.status))
-    .then(() => sendNotification({ firstName, lastName, email, submitted: true }))
+    .then(r => {
+      const submitted = r.ok;
+      if (!submitted) console.error('OwnerRez error:', r.status);
+      return sendNotification({ firstName, lastName, email, submitted });
+    })
     .catch(err => console.error('Background processing error:', err));
 });
 
