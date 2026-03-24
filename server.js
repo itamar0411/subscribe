@@ -54,47 +54,46 @@ async function sendNotification({ firstName, lastName, email, submitted }) {
 
 app.get('/ping', (req, res) => res.sendStatus(200));
 
-app.post('/api/subscribe', async (req, res) => {
+function isValidEmailFormat(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+}
+
+app.post('/api/subscribe', (req, res) => {
   const { firstName, lastName, email } = req.body;
 
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
+  if (!isValidEmailFormat(email)) {
+    return res.status(400).json({ error: 'Invalid email format.' });
+  }
+
+  // Respond immediately — OwnerRez + email happen in background
+  res.status(201).json({ success: true });
+
   const legit = isLegitEmail(email);
 
   if (!legit) {
     sendNotification({ firstName, lastName, email, submitted: false }).catch(console.error);
-    return res.status(201).json({ success: true });
+    return;
   }
 
-  try {
-    const response = await fetch('https://api.ownerrez.com/v2/guests', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': OR_AUTH,
-      },
-      body: JSON.stringify({
-        first_name: firstName,
-        last_name: lastName,
-        email_addresses: [{ address: email, is_default: true }],
-      }),
-    });
-
-    const body = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      console.error('OwnerRez error:', response.status, body);
-      return res.status(502).json({ error: 'Upstream error.' });
-    }
-
-    sendNotification({ firstName, lastName, email, submitted: true }).catch(console.error);
-    res.status(201).json({ success: true, guest: body });
-  } catch (err) {
-    console.error('Request failed:', err);
-    res.status(500).json({ error: 'Internal server error.' });
-  }
+  fetch('https://api.ownerrez.com/v2/guests', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': OR_AUTH,
+    },
+    body: JSON.stringify({
+      first_name: firstName,
+      last_name: lastName,
+      email_addresses: [{ address: email, is_default: true }],
+    }),
+  })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(() => sendNotification({ firstName, lastName, email, submitted: true }))
+    .catch(err => console.error('Background processing error:', err));
 });
 
 const PORT = process.env.PORT || 3000;
