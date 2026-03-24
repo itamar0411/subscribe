@@ -10,6 +10,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OR_AUTH = 'Basic ' + Buffer.from(`${process.env.OR_USER}:${process.env.OR_KEY}`).toString('base64');
 
+app.get('/ping', (req, res) => res.sendStatus(200));
+
 app.post('/api/subscribe', async (req, res) => {
   const { firstName, lastName, email } = req.body;
 
