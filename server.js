@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors());
@@ -10,6 +11,47 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OR_AUTH = 'Basic ' + Buffer.from(`${process.env.OR_USER}:${process.env.OR_KEY}`).toString('base64');
 
+const mailer = nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
+});
+
+function isLegitEmail(email) {
+  const lower = email.trim().toLowerCase();
+  const [local, domain] = lower.split('@');
+  if (!local || !domain) return false;
+  if (/^(test|fake|asdf|qwerty|noreply|donotreply|null|undefined|example|nope|xxx|aaa|bbb|123|abc)\d*$/.test(local)) return false;
+  if (local.length < 2 || local.length > 64) return false;
+  if (!/[aeiouy]/i.test(local)) return false;
+  if (/[^aeiouy\d._-]{5,}/i.test(local)) return false;
+  const disposable = new Set(['mailinator.com','guerrillamail.com','guerrillamail.net','guerrillamail.org','sharklasers.com','grr.la','spam4.me','trashmail.com','trashmail.me','trashmail.net','trashmail.at','trashmail.io','yopmail.com','yopmail.fr','tempr.email','dispostable.com','throwam.com','maildrop.cc','getairmail.com','filzmail.com','spamgourmet.com','fakeinbox.com','mailnull.com','spamspot.com']);
+  if (disposable.has(domain)) return false;
+  if (['example.com','example.net','example.org','test.com','localhost'].includes(domain)) return false;
+  const parts = domain.split('.');
+  if (parts.length < 2) return false;
+  if (!/^[a-z]{2,10}$/.test(parts[parts.length - 1])) return false;
+  if (/^(.)\1{2,}$/.test(parts[parts.length - 2])) return false;
+  return true;
+}
+
+async function sendNotification({ firstName, lastName, email, submitted }) {
+  const status = submitted ? '✅ Successfully added to OwnerRez' : '⚠️ Flagged as suspicious — not submitted';
+  await mailer.sendMail({
+    from: `"High Five Retreats" <${process.env.GMAIL_USER}>`,
+    to: process.env.NOTIFY_EMAIL,
+    subject: submitted ? `New subscriber: ${firstName} ${lastName}` : `Suspicious subscription attempt`,
+    text: `New subscription form submission\n\nName:   ${firstName} ${lastName}\nEmail:  ${email}\nStatus: ${status}`,
+    html: `
+      <p><strong>New subscription form submission</strong></p>
+      <table cellpadding="6">
+        <tr><td><strong>Name</strong></td><td>${firstName} ${lastName}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${email}</td></tr>
+        <tr><td><strong>Status</strong></td><td>${status}</td></tr>
+      </table>
+    `,
+  });
+}
+
 app.get('/ping', (req, res) => res.sendStatus(200));
 
 app.post('/api/subscribe', async (req, res) => {
@@ -17,6 +59,13 @@ app.post('/api/subscribe', async (req, res) => {
 
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  const legit = isLegitEmail(email);
+
+  if (!legit) {
+    sendNotification({ firstName, lastName, email, submitted: false }).catch(console.error);
+    return res.status(201).json({ success: true });
   }
 
   try {
@@ -40,6 +89,7 @@ app.post('/api/subscribe', async (req, res) => {
       return res.status(502).json({ error: 'Upstream error.' });
     }
 
+    sendNotification({ firstName, lastName, email, submitted: true }).catch(console.error);
     res.status(201).json({ success: true, guest: body });
   } catch (err) {
     console.error('Request failed:', err);
