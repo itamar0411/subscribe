@@ -59,6 +59,20 @@ async function sendNotification({ firstName, lastName, email, status }) {
 
 app.get('/ping', (req, res) => res.sendStatus(200));
 
+app.get('/test-email', async (req, res) => {
+  try {
+    const info = await mailer.sendMail({
+      from: process.env.GMAIL_USER,
+      to: process.env.NOTIFY_EMAIL,
+      subject: 'Test email from Render',
+      text: 'If you got this, email works on Render.',
+    });
+    res.json({ ok: true, messageId: info.messageId });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 function isValidEmailFormat(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
