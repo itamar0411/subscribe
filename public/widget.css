@@ -1,23 +1,135 @@
-#subscribe-widget { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-#subscribe-widget *, #subscribe-widget *::before, #subscribe-widget *::after { box-sizing: border-box; margin: 0; padding: 0; }
-#subscribe-widget .sw-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem 1rem; }
-#subscribe-widget .sw-card { background: #fff; border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-#subscribe-widget .sw-header { text-align: center; margin-bottom: 2rem; }
-#subscribe-widget .sw-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-#subscribe-widget .sw-header h2 { font-size: 1.6rem; color: #1a1a2e; margin-bottom: 0.4rem; }
-#subscribe-widget .sw-header p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; }
-#subscribe-widget .sw-row { display: flex; gap: 0.75rem; }
-#subscribe-widget .sw-field { display: flex; flex-direction: column; margin-bottom: 1.1rem; flex: 1; }
-#subscribe-widget .sw-field label { font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
-#subscribe-widget .sw-field input { padding: 0.65rem 0.9rem; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; color: #111827; transition: border-color 0.2s, box-shadow 0.2s; outline: none; width: 100%; background: #fff; }
-#subscribe-widget .sw-field input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
-#subscribe-widget .sw-field input.sw-invalid { border-color: #ef4444; }
-#subscribe-widget .sw-error { font-size: 0.78rem; color: #ef4444; margin-top: 0.3rem; min-height: 1rem; display: block; }
-#subscribe-widget .sw-btn { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; transition: opacity 0.2s, transform 0.1s; }
-#subscribe-widget .sw-btn:hover { opacity: 0.92; }
-#subscribe-widget .sw-btn:active { transform: scale(0.98); }
-#subscribe-widget .sw-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-#subscribe-widget .sw-success { display: none; text-align: center; padding: 1.5rem 0 0.5rem; }
-#subscribe-widget .sw-success .sw-check { font-size: 3rem; margin-bottom: 0.75rem; }
-#subscribe-widget .sw-success h2 { color: #1a1a2e; margin-bottom: 0.4rem; }
-#subscribe-widget .sw-success p { color: #6b7280; font-size: 0.95rem; }
+#subscribe-widget,
+#subscribe-widget *,
+#subscribe-widget *::before,
+#subscribe-widget *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#subscribe-widget {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#subscribe-widget .card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+#subscribe-widget .card-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+#subscribe-widget .card-header .icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+#subscribe-widget .card-header h1 {
+  font-size: 1.6rem;
+  color: #1a1a2e;
+  margin-bottom: 0.4rem;
+}
+
+#subscribe-widget .card-header p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+#subscribe-widget .row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+#subscribe-widget .field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.1rem;
+  flex: 1;
+}
+
+#subscribe-widget .field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+
+#subscribe-widget .field input {
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #111827;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  width: 100%;
+  background: #fff;
+}
+
+#subscribe-widget .field input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+#subscribe-widget .field input.invalid {
+  border-color: #ef4444;
+}
+
+#subscribe-widget .field-error {
+  font-size: 0.78rem;
+  color: #ef4444;
+  margin-top: 0.3rem;
+  min-height: 1rem;
+  display: block;
+}
+
+#subscribe-widget button[type="submit"] {
+  width: 100%;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+#subscribe-widget button[type="submit"]:hover  { opacity: 0.92; }
+#subscribe-widget button[type="submit"]:active  { transform: scale(0.98); }
+#subscribe-widget button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+
+#subscribe-widget .success {
+  display: none;
+  text-align: center;
+  padding: 1.5rem 0 0.5rem;
+}
+
+#subscribe-widget .success .check {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+#subscribe-widget .success h2 {
+  color: #1a1a2e;
+  margin-bottom: 0.4rem;
+}
+
+#subscribe-widget .success p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
