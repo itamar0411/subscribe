@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors());
@@ -10,11 +9,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const OR_AUTH = 'Basic ' + Buffer.from(`${process.env.OR_USER}:${process.env.OR_KEY}`).toString('base64');
-
-const mailer = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
-});
 
 function isLegitEmail(email) {
   const lower = email.trim().toLowerCase();
@@ -36,46 +30,58 @@ function isLegitEmail(email) {
 
 async function sendNotification({ firstName, lastName, email, status }) {
   const statusMap = {
-    success:   { label: '✅ Successfully added to OwnerRez', subject: `New subscriber: ${firstName} ${lastName}` },
+    success:    { label: '✅ Successfully added to OwnerRez', subject: `New subscriber: ${firstName} ${lastName}` },
     suspicious: { label: '⚠️ Flagged as suspicious — not submitted', subject: `Suspicious subscription attempt` },
-    error:     { label: '❌ OwnerRez error — not added to contacts', subject: `Subscription error: ${firstName} ${lastName}` },
+    error:      { label: '❌ OwnerRez error — not added to contacts', subject: `Subscription error: ${firstName} ${lastName}` },
   };
   const { label, subject } = statusMap[status];
-  await mailer.sendMail({
-    from: `"High Five Retreats" <${process.env.GMAIL_USER}>`,
-    to: process.env.NOTIFY_EMAIL,
-    subject,
-    text: `New subscription form submission\n\nName:   ${firstName} ${lastName}\nEmail:  ${email}\nStatus: ${label}`,
-    html: `
-      <p><strong>New subscription form submission</strong></p>
-      <table cellpadding="6">
-        <tr><td><strong>Name</strong></td><td>${firstName} ${lastName}</td></tr>
-        <tr><td><strong>Email</strong></td><td>${email}</td></tr>
-        <tr><td><strong>Status</strong></td><td>${label}</td></tr>
-      </table>
-    `,
+
+  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.SENDGRID_KEY}`,
+    },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: process.env.NOTIFY_EMAIL }] }],
+      from: { email: process.env.NOTIFY_EMAIL, name: 'High Five Retreats' },
+      subject,
+      content: [
+        {
+          type: 'text/html',
+          value: `
+            <p><strong>New subscription form submission</strong></p>
+            <table cellpadding="6">
+              <tr><td><strong>Name</strong></td><td>${firstName} ${lastName}</td></tr>
+              <tr><td><strong>Email</strong></td><td>${email}</td></tr>
+              <tr><td><strong>Status</strong></td><td>${label}</td></tr>
+            </table>
+          `,
+        },
+      ],
+    }),
   });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`SendGrid ${res.status}: ${body}`);
+  }
+}
+
+function isValidEmailFormat(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
 
 app.get('/ping', (req, res) => res.sendStatus(200));
 
 app.get('/test-email', async (req, res) => {
   try {
-    const info = await mailer.sendMail({
-      from: process.env.GMAIL_USER,
-      to: process.env.NOTIFY_EMAIL,
-      subject: 'Test email from Render',
-      text: 'If you got this, email works on Render.',
-    });
-    res.json({ ok: true, messageId: info.messageId });
+    await sendNotification({ firstName: 'Test', lastName: 'User', email: 'test@test.com', status: 'success' });
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
-
-function isValidEmailFormat(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
-}
 
 app.post('/api/subscribe', (req, res) => {
   const { firstName, lastName, email } = req.body;
