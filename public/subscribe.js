@@ -115,12 +115,6 @@
 
     if (!valid) return;
 
-    // Silent legitimacy check — do not reveal the reason to the user
-    if (!isLegitEmail(email)) {
-      simulateSuccess(); // appear to succeed so bad actors get no signal
-      return;
-    }
-
     await submitSubscription({ firstName, lastName, email });
   });
 

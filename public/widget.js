@@ -67,8 +67,6 @@
     else if (!isValidEmail(email)) valid = showError('sw-email', 'sw-email-error', 'Please enter a valid email address.');
     if (!valid) return;
 
-    if (!isLegitEmail(email)) { simulateSuccess(); return; }
-
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.6';
     submitBtn.style.cursor = 'not-allowed';
