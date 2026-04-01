@@ -84,7 +84,9 @@ app.get('/test-email', async (req, res) => {
 });
 
 app.post('/api/subscribe', (req, res) => {
-  const { firstName, lastName, email } = req.body;
+  const firstName = (req.body.firstName || '').trim();
+  const lastName  = (req.body.lastName  || '').trim();
+  const email     = (req.body.email     || '').trim();
 
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ error: 'Missing required fields.' });
