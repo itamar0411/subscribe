@@ -10,14 +10,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OR_AUTH = 'Basic ' + Buffer.from(`${process.env.OR_USER}:${process.env.OR_KEY}`).toString('base64');
 
-function isLegitEmail(email) {
+async function isLegitEmail(email) {
   const lower = email.trim().toLowerCase();
   const [local, domain] = lower.split('@');
   if (!local || !domain) return false;
   if (/^(test|fake|asdf|qwerty|noreply|donotreply|null|undefined|example|nope|xxx|aaa|bbb|123|abc)\d*$/.test(local)) return false;
   if (local.length < 2 || local.length > 64) return false;
-  if (!/[aeiouy]/i.test(local)) return false;
-  if (/[^aeiouy\d._-]{5,}/i.test(local)) return false;
   const disposable = new Set(['mailinator.com','guerrillamail.com','guerrillamail.net','guerrillamail.org','sharklasers.com','grr.la','spam4.me','trashmail.com','trashmail.me','trashmail.net','trashmail.at','trashmail.io','yopmail.com','yopmail.fr','tempr.email','dispostable.com','throwam.com','maildrop.cc','getairmail.com','filzmail.com','spamgourmet.com','fakeinbox.com','mailnull.com','spamspot.com']);
   if (disposable.has(domain)) return false;
   if (['example.com','example.net','example.org','test.com','localhost'].includes(domain)) return false;
@@ -25,6 +23,27 @@ function isLegitEmail(email) {
   if (parts.length < 2) return false;
   if (!/^[a-z]{2,10}$/.test(parts[parts.length - 1])) return false;
   if (/^(.)\1{2,}$/.test(parts[parts.length - 2])) return false;
+
+  // Use Hugging Face gibberish detection model on the local part
+  try {
+    const hfRes = await fetch('https://router.huggingface.co/hf-inference/models/madhurjindal/autonlp-Gibberish-Detector-492513457', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.HF_KEY}`,
+      },
+      body: JSON.stringify({ inputs: local }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (hfRes.ok) {
+      const data = await hfRes.json();
+      const noiseScore = data[0]?.find(l => l.label === 'noise')?.score ?? 0;
+      if (noiseScore > 0.5) return false;
+    }
+  } catch (err) {
+    console.error('HF gibberish check failed:', err.message);
+  }
+
   return true;
 }
 
@@ -99,30 +118,29 @@ app.post('/api/subscribe', (req, res) => {
   // Respond immediately — OwnerRez + email happen in background
   res.status(201).json({ success: true });
 
-  const legit = isLegitEmail(email);
+  (async () => {
+    const legit = await isLegitEmail(email);
 
-  if (!legit) {
-    sendNotification({ firstName, lastName, email, status: 'suspicious' }).catch(console.error);
-    return;
-  }
+    if (!legit) {
+      await sendNotification({ firstName, lastName, email, status: 'suspicious' });
+      return;
+    }
 
-  fetch('https://api.ownerrez.com/v2/guests', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': OR_AUTH,
-    },
-    body: JSON.stringify({
-      first_name: firstName,
-      last_name: lastName,
-      email_addresses: [{ address: email, is_default: true }],
-    }),
-  })
-    .then(r => {
-      if (!r.ok) console.error('OwnerRez error:', r.status);
-      return sendNotification({ firstName, lastName, email, status: r.ok ? 'success' : 'error' });
-    })
-    .catch(err => console.error('Background processing error:', err));
+    const r = await fetch('https://api.ownerrez.com/v2/guests', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': OR_AUTH,
+      },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        email_addresses: [{ address: email, is_default: true }],
+      }),
+    });
+    if (!r.ok) console.error('OwnerRez error:', r.status);
+    await sendNotification({ firstName, lastName, email, status: r.ok ? 'success' : 'error' });
+  })().catch(err => console.error('Background processing error:', err));
 });
 
 const PORT = process.env.PORT || 3000;
