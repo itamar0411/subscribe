@@ -168,5 +168,9 @@ app.post('/api/subscribe', (req, res) => {
   })().catch(err => console.error('Background processing error:', err));
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+}
+
+module.exports = { app, isValidEmailFormat, isLegitEmail };
