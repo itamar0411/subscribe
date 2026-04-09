@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const geoip = require('geoip-lite');
 
 const app = express();
 app.use(cors());
@@ -130,10 +131,19 @@ app.post('/api/subscribe', (req, res) => {
     return res.status(400).json({ error: 'Invalid email format.' });
   }
 
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip;
+  const geo = geoip.lookup(ip);
+  const isUS = !geo || geo.country === 'US';
+
   // Respond immediately — OwnerRez + email happen in background
   res.status(201).json({ success: true });
 
   (async () => {
+    if (!isUS) {
+      await sendNotification({ firstName, lastName, email, status: 'suspicious' });
+      return;
+    }
+
     const legit = await isLegitEmail(email);
 
     if (!legit) {
