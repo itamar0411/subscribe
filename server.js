@@ -19,6 +19,21 @@ async function isLegitEmail(email) {
   const disposable = new Set(['mailinator.com','guerrillamail.com','guerrillamail.net','guerrillamail.org','sharklasers.com','grr.la','spam4.me','trashmail.com','trashmail.me','trashmail.net','trashmail.at','trashmail.io','yopmail.com','yopmail.fr','tempr.email','dispostable.com','throwam.com','maildrop.cc','getairmail.com','filzmail.com','spamgourmet.com','fakeinbox.com','mailnull.com','spamspot.com']);
   if (disposable.has(domain)) return false;
   if (['example.com','example.net','example.org','test.com','localhost'].includes(domain)) return false;
+
+  // Reject marketing platforms and property management companies
+  const blockedIndustry = new Set([
+    // Marketing platforms
+    'mailchimp.com','constantcontact.com','hubspot.com','salesforce.com',
+    'marketo.com','klaviyo.com','campaignmonitor.com','activecampaign.com',
+    'brevo.com','sendinblue.com','drip.com','convertkit.com','aweber.com',
+    'getresponse.com','mailerlite.com',
+    // Property management & OTAs
+    'airbnb.com','vrbo.com','booking.com','expedia.com','tripadvisor.com',
+    'homeaway.com','vacasa.com','evolve.com','sonder.com','guesty.com',
+    'hostaway.com','lodgify.com','ownerrez.com','hostfully.com',
+    'rentalsunited.com','track.com','turnkey.com',
+  ]);
+  if (blockedIndustry.has(domain)) return false;
   const parts = domain.split('.');
   if (parts.length < 2) return false;
   if (!/^[a-z]{2,10}$/.test(parts[parts.length - 1])) return false;
