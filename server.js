@@ -141,7 +141,8 @@ app.post('/api/subscribe', subscribeLimiter, (req, res) => {
 
   // Honeypot: if this hidden field is filled, it's a bot
   if (req.body.website) {
-    return res.status(201).json({ success: true }); // silent success
+    sendNotification({ firstName, lastName, email, status: 'suspicious', reason: 'Bot detected — honeypot field was filled' }).catch(console.error);
+    return res.status(201).json({ success: true });
   }
 
   if (!firstName || !lastName || !email) {

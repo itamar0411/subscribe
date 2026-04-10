@@ -185,7 +185,7 @@ describe('POST /api/subscribe — geo check', () => {
 // ─── POST /api/subscribe — honeypot ───────────────────────────────────────────
 
 describe('POST /api/subscribe — honeypot', () => {
-  test('silently returns 201 if honeypot field is filled', async () => {
+  test('returns 201 and sends notification if honeypot field is filled', async () => {
     const res = await request(app).post('/api/subscribe')
       .set('X-Forwarded-For', '10.0.0.50')
       .send({ firstName: 'Bot', lastName: 'Spam', email: 'bot@spam.com', website: 'http://spam.com' });
