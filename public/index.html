@@ -151,6 +151,36 @@
       font-size: 0.9rem;
       font-weight: 600;
     }
+
+    .privacy {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.6rem;
+    }
+
+    .toast {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fef2f2;
+      border: 1.5px solid #fca5a5;
+      color: #991b1b;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -187,6 +217,7 @@
         </div>
 
         <button type="submit" id="submit-btn">Subscribe Now</button>
+        <p class="privacy">We respect your privacy. Unsubscribe anytime.</p>
       </form>
     </div>
 
@@ -198,6 +229,7 @@
     </div>
   </div>
 
+  <div class="toast" id="error-toast"></div>
   <script src="subscribe.js"></script>
 </body>
 </html>

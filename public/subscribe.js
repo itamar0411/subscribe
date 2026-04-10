@@ -132,7 +132,7 @@
       console.error('Subscription error:', err);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Subscribe Now';
-      alert('Something went wrong. Please try again later.');
+      showToast('Something went wrong. Please try again later.');
     }
   }
 
@@ -146,5 +146,12 @@
   function showSuccess() {
     formSection.style.display = 'none';
     successSection.style.display = 'block';
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('error-toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 4000);
   }
 })();

@@ -83,7 +83,7 @@
       submitBtn.style.opacity = '1';
       submitBtn.style.cursor = 'pointer';
       submitBtn.textContent = 'Subscribe Now';
-      alert('Something went wrong. Please try again later.');
+      showToast('Something went wrong. Please try again later.');
     }
   });
 
@@ -96,5 +96,13 @@
   function showSuccess() {
     formSection.style.display = 'none';
     successSection.style.display = 'block';
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('sw-error-toast');
+    if (!toast) { alert(message); return; }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 4000);
   }
 })();
