@@ -74,7 +74,7 @@
       const res = await fetch('https://subscribe-8m41.onrender.com/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email }),
+        body: JSON.stringify({ firstName, lastName, email, website: document.getElementById('sw-website')?.value || '' }),
       });
       if (!res.ok) throw new Error();
       showSuccess();

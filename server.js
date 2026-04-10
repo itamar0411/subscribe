@@ -3,11 +3,22 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const geoip = require('geoip-lite');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Rate limit: max 5 subscribe attempts per IP per 15 minutes
+const subscribeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please try again later.' },
+});
 
 const OR_AUTH = 'Basic ' + Buffer.from(`${process.env.OR_USER}:${process.env.OR_KEY}`).toString('base64');
 
@@ -123,10 +134,15 @@ app.get('/test-email', async (req, res) => {
   }
 });
 
-app.post('/api/subscribe', (req, res) => {
+app.post('/api/subscribe', subscribeLimiter, (req, res) => {
   const firstName = (req.body.firstName || '').trim();
   const lastName  = (req.body.lastName  || '').trim();
   const email     = (req.body.email     || '').trim();
+
+  // Honeypot: if this hidden field is filled, it's a bot
+  if (req.body.website) {
+    return res.status(201).json({ success: true }); // silent success
+  }
 
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ error: 'Missing required fields.' });

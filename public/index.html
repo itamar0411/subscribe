@@ -163,6 +163,10 @@
       </div>
 
       <form id="subscribe-form" novalidate>
+        <!-- Honeypot — hidden from humans, bots fill it in -->
+        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+          <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+        </div>
         <div class="row">
           <div class="field">
             <label for="first-name">First Name</label>

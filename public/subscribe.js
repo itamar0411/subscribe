@@ -110,7 +110,8 @@
 
     if (!valid) return;
 
-    await submitSubscription({ firstName, lastName, email });
+    const website = document.getElementById('website')?.value || '';
+    await submitSubscription({ firstName, lastName, email, website });
   });
 
   async function submitSubscription(data) {

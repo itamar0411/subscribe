@@ -135,33 +135,34 @@ describe('isLegitEmail — HF gibberish detection', () => {
 // ─── POST /api/subscribe ──────────────────────────────────────────────────────
 
 describe('POST /api/subscribe — validation', () => {
+  const ip = '10.0.1.1';
   test('returns 400 if firstName missing', async () => {
-    const res = await request(app).post('/api/subscribe').send({ lastName: 'Doe', email: 'jane@gmail.com' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send({ lastName: 'Doe', email: 'jane@gmail.com' });
     expect(res.status).toBe(400);
   });
 
   test('returns 400 if lastName missing', async () => {
-    const res = await request(app).post('/api/subscribe').send({ firstName: 'Jane', email: 'jane@gmail.com' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send({ firstName: 'Jane', email: 'jane@gmail.com' });
     expect(res.status).toBe(400);
   });
 
   test('returns 400 if email missing', async () => {
-    const res = await request(app).post('/api/subscribe').send({ firstName: 'Jane', lastName: 'Doe' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send({ firstName: 'Jane', lastName: 'Doe' });
     expect(res.status).toBe(400);
   });
 
   test('returns 400 if email format invalid', async () => {
-    const res = await request(app).post('/api/subscribe').send({ firstName: 'Jane', lastName: 'Doe', email: 'notanemail' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send({ firstName: 'Jane', lastName: 'Doe', email: 'notanemail' });
     expect(res.status).toBe(400);
   });
 
   test('returns 400 for whitespace-only firstName', async () => {
-    const res = await request(app).post('/api/subscribe').send({ firstName: '   ', lastName: 'Doe', email: 'jane@gmail.com' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send({ firstName: '   ', lastName: 'Doe', email: 'jane@gmail.com' });
     expect(res.status).toBe(400);
   });
 
   test('returns 201 for valid submission', async () => {
-    const res = await request(app).post('/api/subscribe').send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', '10.0.1.2').send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
   });
@@ -170,14 +171,47 @@ describe('POST /api/subscribe — validation', () => {
 describe('POST /api/subscribe — geo check', () => {
   test('returns 201 for non-US IP (still responds success)', async () => {
     geoip.lookup.mockReturnValue({ country: 'IL' });
-    const res = await request(app).post('/api/subscribe').send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', '10.0.2.1').send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' });
     expect(res.status).toBe(201);
   });
 
   test('returns 201 for unknown IP (no geo data)', async () => {
     geoip.lookup.mockReturnValue(null);
-    const res = await request(app).post('/api/subscribe').send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' });
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', '10.0.2.2').send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' });
     expect(res.status).toBe(201);
+  });
+});
+
+// ─── POST /api/subscribe — honeypot ───────────────────────────────────────────
+
+describe('POST /api/subscribe — honeypot', () => {
+  test('silently returns 201 if honeypot field is filled', async () => {
+    const res = await request(app).post('/api/subscribe')
+      .set('X-Forwarded-For', '10.0.0.50')
+      .send({ firstName: 'Bot', lastName: 'Spam', email: 'bot@spam.com', website: 'http://spam.com' });
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+  });
+
+  test('proceeds normally if honeypot field is empty', async () => {
+    const res = await request(app).post('/api/subscribe')
+      .set('X-Forwarded-For', '10.0.0.51')
+      .send({ firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com', website: '' });
+    expect(res.status).toBe(201);
+  });
+});
+
+// ─── POST /api/subscribe — rate limiting ─────────────────────────────────────
+
+describe('POST /api/subscribe — rate limiting', () => {
+  test('returns 429 after exceeding rate limit', async () => {
+    const payload = { firstName: 'Jane', lastName: 'Doe', email: 'jane@gmail.com' };
+    const ip = '10.0.0.99';
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send(payload);
+    }
+    const res = await request(app).post('/api/subscribe').set('X-Forwarded-For', ip).send(payload);
+    expect(res.status).toBe(429);
   });
 });
 
