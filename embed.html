@@ -1,5 +1,9 @@
+<div id="subscribe-loader" style="text-align:center;padding:3rem;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#6b7280;">
+  <p style="font-size:1.1rem;">Loading exclusive deals...</p>
+</div>
 <iframe
   src="https://subscribe-8m41.onrender.com"
-  style="width:100%;border:none;height:500px;display:block;background:#fff;"
+  style="width:100%;border:none;height:500px;display:none;background:#fff;"
   title="Subscribe for promotions"
+  onload="this.style.display='block';document.getElementById('subscribe-loader').style.display='none';"
 ></iframe>
